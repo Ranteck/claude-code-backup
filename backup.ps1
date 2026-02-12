@@ -17,6 +17,23 @@ Write-Host ""
 Write-Host "=== Claude Code Config Backup ===" -ForegroundColor Cyan
 Write-Host ""
 
+# Pull latest from private repo before copying (merge strategy)
+$gitDir = Join-Path $BackupDir ".git"
+if (Test-Path $gitDir) {
+    Push-Location $BackupDir
+    try {
+        git pull --ff-only 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  [OK] Pulled latest from private repo" -ForegroundColor Green
+        } else {
+            Write-Host "  [WARN] Pull failed. Continuing with local copy..." -ForegroundColor Yellow
+        }
+    } finally {
+        Pop-Location
+    }
+    Write-Host ""
+}
+
 $backedUp = @()
 
 # settings.json
@@ -34,10 +51,13 @@ if (Test-Path "$ClaudeDir\plugins\installed_plugins.json") {
 }
 
 # Projects (per-project settings, memory, permissions)
+# Non-destructive: overwrites existing files but preserves remote-only projects
 if (Test-Path "$ClaudeDir\projects") {
-    if (Test-Path "$BackupDir\projects") { Remove-Item "$BackupDir\projects" -Recurse -Force }
-    Copy-Item "$ClaudeDir\projects" "$BackupDir\projects" -Recurse -Force
-    Write-Host "  [OK] projects/" -ForegroundColor Green
+    New-Item -ItemType Directory -Force -Path "$BackupDir\projects" | Out-Null
+    Get-ChildItem "$ClaudeDir\projects" | ForEach-Object {
+        Copy-Item $_.FullName "$BackupDir\projects\$($_.Name)" -Recurse -Force
+    }
+    Write-Host "  [OK] projects/ (merged)" -ForegroundColor Green
     $backedUp += "projects/"
 }
 
@@ -55,11 +75,11 @@ if (Test-Path "$ClaudeDir\keybindings.json") {
     $backedUp += "keybindings.json"
 }
 
-# Custom slash commands
+# Custom slash commands (non-destructive merge)
 if (Test-Path "$ClaudeDir\commands") {
-    if (Test-Path "$BackupDir\commands") { Remove-Item "$BackupDir\commands" -Recurse -Force }
-    Copy-Item "$ClaudeDir\commands" "$BackupDir\commands" -Recurse -Force
-    Write-Host "  [OK] commands/" -ForegroundColor Green
+    New-Item -ItemType Directory -Force -Path "$BackupDir\commands" | Out-Null
+    Copy-Item "$ClaudeDir\commands\*" "$BackupDir\commands\" -Recurse -Force
+    Write-Host "  [OK] commands/ (merged)" -ForegroundColor Green
     $backedUp += "commands/"
 }
 

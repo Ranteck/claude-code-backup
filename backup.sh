@@ -22,6 +22,16 @@ echo ""
 echo "=== Claude Code Config Backup ==="
 echo ""
 
+# Pull latest from private repo before copying (merge strategy)
+if [[ -d "$BACKUP_DIR/.git" ]]; then
+    if git -C "$BACKUP_DIR" pull --ff-only > /dev/null 2>&1; then
+        echo "  [OK] Pulled latest from private repo"
+    else
+        echo "  [WARN] Pull failed. Continuing with local copy..."
+    fi
+    echo ""
+fi
+
 BACKED_UP=0
 
 # settings.json
@@ -39,9 +49,10 @@ if [[ -f "$CLAUDE_DIR/plugins/installed_plugins.json" ]]; then
 fi
 
 # Projects (per-project settings, memory, permissions)
+# Non-destructive: overwrites existing files but preserves remote-only projects
 if [[ -d "$CLAUDE_DIR/projects" ]]; then
-    rsync -a --delete "$CLAUDE_DIR/projects/" "$BACKUP_DIR/projects/"
-    echo "  [OK] projects/"
+    rsync -a "$CLAUDE_DIR/projects/" "$BACKUP_DIR/projects/"
+    echo "  [OK] projects/ (merged)"
     ((BACKED_UP++))
 fi
 
@@ -59,10 +70,10 @@ if [[ -f "$CLAUDE_DIR/keybindings.json" ]]; then
     ((BACKED_UP++))
 fi
 
-# Custom slash commands
+# Custom slash commands (non-destructive merge)
 if [[ -d "$CLAUDE_DIR/commands" ]]; then
-    rsync -a --delete "$CLAUDE_DIR/commands/" "$BACKUP_DIR/commands/"
-    echo "  [OK] commands/"
+    rsync -a "$CLAUDE_DIR/commands/" "$BACKUP_DIR/commands/"
+    echo "  [OK] commands/ (merged)"
     ((BACKED_UP++))
 fi
 
