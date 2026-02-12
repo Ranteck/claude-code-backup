@@ -41,6 +41,7 @@ if git ls-remote "$REPO_URL" > /dev/null 2>&1 && [[ -n $(git ls-remote "$REPO_UR
     echo "  Found existing backup repo. Cloning..."
     rm -rf "$BACKUP_DIR"
     if git clone "$REPO_URL" "$BACKUP_DIR" > /dev/null 2>&1; then
+        git -C "$BACKUP_DIR" config core.longpaths true
         echo "  [OK] Cloned private repo into backup/"
     else
         echo "  [ERROR] Clone failed. Check the URL and your credentials."
@@ -53,6 +54,7 @@ else
     cd "$BACKUP_DIR"
 
     git init -b main > /dev/null 2>&1
+    git config core.longpaths true
     git remote add origin "$REPO_URL" > /dev/null 2>&1
 
     # Create a minimal .gitkeep so we can do an initial commit

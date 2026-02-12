@@ -39,6 +39,7 @@ if ($LASTEXITCODE -eq 0 -and $lsRemote) {
     if (Test-Path $BackupDir) { Remove-Item $BackupDir -Recurse -Force }
     git clone $RepoUrl $BackupDir 2>&1 | Out-Null
     if ($LASTEXITCODE -eq 0) {
+        git -C $BackupDir config core.longpaths true
         Write-Host "  [OK] Cloned private repo into backup/" -ForegroundColor Green
     } else {
         Write-Host "  [ERROR] Clone failed. Check the URL and your credentials." -ForegroundColor Red
@@ -51,6 +52,7 @@ if ($LASTEXITCODE -eq 0 -and $lsRemote) {
     Push-Location $BackupDir
     try {
         git init -b main 2>&1 | Out-Null
+        git config core.longpaths true
         git remote add origin $RepoUrl 2>&1 | Out-Null
 
         # Create a minimal .gitkeep so we can do an initial commit
