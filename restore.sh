@@ -46,7 +46,7 @@ RESTORED=0
 if [[ -f "$BACKUP_DIR/settings.json" ]]; then
     cp "$BACKUP_DIR/settings.json" "$CLAUDE_DIR/settings.json"
     echo "  [OK] settings.json"
-    ((RESTORED++))
+    ((RESTORED++)) || true
 fi
 
 # installed_plugins.json
@@ -54,35 +54,57 @@ if [[ -f "$BACKUP_DIR/installed_plugins.json" ]]; then
     mkdir -p "$CLAUDE_DIR/plugins"
     cp "$BACKUP_DIR/installed_plugins.json" "$CLAUDE_DIR/plugins/installed_plugins.json"
     echo "  [OK] installed_plugins.json"
-    ((RESTORED++))
+    ((RESTORED++)) || true
+fi
+
+# known_marketplaces.json
+if [[ -f "$BACKUP_DIR/known_marketplaces.json" ]]; then
+    mkdir -p "$CLAUDE_DIR/plugins"
+    cp "$BACKUP_DIR/known_marketplaces.json" "$CLAUDE_DIR/plugins/known_marketplaces.json"
+    echo "  [OK] known_marketplaces.json"
+    ((RESTORED++)) || true
 fi
 
 # Projects
 if [[ -d "$BACKUP_DIR/projects" ]]; then
     rsync -a --delete "$BACKUP_DIR/projects/" "$CLAUDE_DIR/projects/"
     echo "  [OK] projects/"
-    ((RESTORED++))
+    ((RESTORED++)) || true
 fi
 
 # Global MCP config
 if [[ -f "$BACKUP_DIR/mcp.json" ]]; then
     cp "$BACKUP_DIR/mcp.json" "$HOME/.mcp.json"
     echo "  [OK] .mcp.json (global MCP servers)"
-    ((RESTORED++))
+    ((RESTORED++)) || true
 fi
 
 # Keybindings
 if [[ -f "$BACKUP_DIR/keybindings.json" ]]; then
     cp "$BACKUP_DIR/keybindings.json" "$CLAUDE_DIR/keybindings.json"
     echo "  [OK] keybindings.json"
-    ((RESTORED++))
+    ((RESTORED++)) || true
 fi
 
 # Custom slash commands
 if [[ -d "$BACKUP_DIR/commands" ]]; then
     rsync -a --delete "$BACKUP_DIR/commands/" "$CLAUDE_DIR/commands/"
     echo "  [OK] commands/"
-    ((RESTORED++))
+    ((RESTORED++)) || true
+fi
+
+# Skills
+if [[ -d "$BACKUP_DIR/skills" ]]; then
+    rsync -a "$BACKUP_DIR/skills/" "$CLAUDE_DIR/skills/"
+    echo "  [OK] skills/"
+    ((RESTORED++)) || true
+fi
+
+# Todos
+if [[ -d "$BACKUP_DIR/todos" ]]; then
+    rsync -a "$BACKUP_DIR/todos/" "$CLAUDE_DIR/todos/"
+    echo "  [OK] todos/"
+    ((RESTORED++)) || true
 fi
 
 echo ""

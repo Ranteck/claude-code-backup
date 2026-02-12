@@ -38,14 +38,21 @@ BACKED_UP=0
 if [[ -f "$CLAUDE_DIR/settings.json" ]]; then
     cp "$CLAUDE_DIR/settings.json" "$BACKUP_DIR/settings.json"
     echo "  [OK] settings.json"
-    ((BACKED_UP++))
+    ((BACKED_UP++)) || true
 fi
 
 # installed_plugins.json
 if [[ -f "$CLAUDE_DIR/plugins/installed_plugins.json" ]]; then
     cp "$CLAUDE_DIR/plugins/installed_plugins.json" "$BACKUP_DIR/installed_plugins.json"
     echo "  [OK] installed_plugins.json"
-    ((BACKED_UP++))
+    ((BACKED_UP++)) || true
+fi
+
+# known_marketplaces.json (needed to restore plugins on another machine)
+if [[ -f "$CLAUDE_DIR/plugins/known_marketplaces.json" ]]; then
+    cp "$CLAUDE_DIR/plugins/known_marketplaces.json" "$BACKUP_DIR/known_marketplaces.json"
+    echo "  [OK] known_marketplaces.json"
+    ((BACKED_UP++)) || true
 fi
 
 # Projects (per-project settings, memory, permissions)
@@ -53,28 +60,42 @@ fi
 if [[ -d "$CLAUDE_DIR/projects" ]]; then
     rsync -a "$CLAUDE_DIR/projects/" "$BACKUP_DIR/projects/"
     echo "  [OK] projects/ (merged)"
-    ((BACKED_UP++))
+    ((BACKED_UP++)) || true
 fi
 
 # Global MCP config
 if [[ -f "$HOME/.mcp.json" ]]; then
     cp "$HOME/.mcp.json" "$BACKUP_DIR/mcp.json"
     echo "  [OK] mcp.json (global MCP servers)"
-    ((BACKED_UP++))
+    ((BACKED_UP++)) || true
 fi
 
 # Keybindings
 if [[ -f "$CLAUDE_DIR/keybindings.json" ]]; then
     cp "$CLAUDE_DIR/keybindings.json" "$BACKUP_DIR/keybindings.json"
     echo "  [OK] keybindings.json"
-    ((BACKED_UP++))
+    ((BACKED_UP++)) || true
 fi
 
 # Custom slash commands (non-destructive merge)
 if [[ -d "$CLAUDE_DIR/commands" ]]; then
     rsync -a "$CLAUDE_DIR/commands/" "$BACKUP_DIR/commands/"
     echo "  [OK] commands/ (merged)"
-    ((BACKED_UP++))
+    ((BACKED_UP++)) || true
+fi
+
+# Skills (non-destructive merge)
+if [[ -d "$CLAUDE_DIR/skills" ]]; then
+    rsync -a "$CLAUDE_DIR/skills/" "$BACKUP_DIR/skills/"
+    echo "  [OK] skills/ (merged)"
+    ((BACKED_UP++)) || true
+fi
+
+# Todos (non-destructive merge)
+if [[ -d "$CLAUDE_DIR/todos" ]]; then
+    rsync -a "$CLAUDE_DIR/todos/" "$BACKUP_DIR/todos/"
+    echo "  [OK] todos/ (merged)"
+    ((BACKED_UP++)) || true
 fi
 
 if [[ $BACKED_UP -eq 0 ]]; then
