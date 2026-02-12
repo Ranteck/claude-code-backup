@@ -10,10 +10,13 @@ Your config stays in a **private repo** you control. The scripts live in this **
 |------|--------|-------------|
 | `settings.json` | `~/.claude/settings.json` | Global settings and permissions |
 | `installed_plugins.json` | `~/.claude/plugins/installed_plugins.json` | List of installed plugins |
+| `known_marketplaces.json` | `~/.claude/plugins/known_marketplaces.json` | Plugin marketplace sources |
 | `projects/` | `~/.claude/projects/` | Per-project settings, memory, and permissions |
 | `mcp.json` | `~/.mcp.json` | Global MCP server configuration |
 | `keybindings.json` | `~/.claude/keybindings.json` | Custom keybindings |
 | `commands/` | `~/.claude/commands/` | Custom slash commands |
+| `skills/` | `~/.claude/skills/` | Custom skills (e.g. jira-summary) |
+| `todos/` | `~/.claude/todos/` | Session todos |
 
 ## Architecture
 
@@ -26,9 +29,12 @@ claude-code-backup/           ← public repo (this one)
 └── backup/                   ← private repo (your data)
     ├── settings.json
     ├── installed_plugins.json
+    ├── known_marketplaces.json
     ├── mcp.json
     ├── projects/
-    └── commands/
+    ├── commands/
+    ├── skills/
+    └── todos/
 ```
 
 **Two repos. Two pushes. Zero connection between them.**
@@ -52,13 +58,15 @@ This links the `backup/` folder to your private repo.
 
 **Windows (PowerShell):**
 ```powershell
-.\setup.ps1 -RepoUrl "https://github.com/YOUR_USER/claude-code-backup-data.git"
+.\setup.ps1 -RepoUrl "git@github.com:YOUR_USER/claude-code-backup-data.git"
 ```
 
 **macOS / Linux:**
 ```bash
-bash setup.sh https://github.com/YOUR_USER/claude-code-backup-data.git
+bash setup.sh git@github.com:YOUR_USER/claude-code-backup-data.git
 ```
+
+> **Tip:** SSH URLs are recommended. HTTPS requires a Personal Access Token (GitHub no longer accepts passwords).
 
 ### 4. Run your first backup
 
@@ -87,11 +95,13 @@ cd claude-code-backup
 
 ```powershell
 # Windows
-.\setup.ps1 -RepoUrl "https://github.com/YOUR_USER/claude-code-backup-data.git"
+.\setup.ps1 -RepoUrl "git@github.com:YOUR_USER/claude-code-backup-data.git"
 
 # macOS / Linux
-bash setup.sh https://github.com/YOUR_USER/claude-code-backup-data.git
+bash setup.sh git@github.com:YOUR_USER/claude-code-backup-data.git
 ```
+
+Setup is smart: if the remote already has data and you have local data, it **merges** them (local wins on conflicts, remote-only files are preserved).
 
 ### 3. Restore
 
@@ -111,7 +121,7 @@ Plugins will re-download automatically on first launch.
 
 | Script | Description |
 |--------|-------------|
-| `setup.ps1` / `setup.sh` | One-time setup: links `backup/` to your private repo |
+| `setup.ps1` / `setup.sh` | One-time setup: links `backup/` to your private repo (handles merge across machines) |
 | `backup.ps1` / `backup.sh` | Copy config → `backup/`, commit + push |
 | `restore.ps1` / `restore.sh` | Copy `backup/` → Claude Code config |
 
