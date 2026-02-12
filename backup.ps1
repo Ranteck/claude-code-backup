@@ -75,12 +75,39 @@ if (Test-Path "$ClaudeDir\keybindings.json") {
     $backedUp += "keybindings.json"
 }
 
+# known_marketplaces.json (needed to restore plugins on another machine)
+if (Test-Path "$ClaudeDir\plugins\known_marketplaces.json") {
+    Copy-Item "$ClaudeDir\plugins\known_marketplaces.json" "$BackupDir\known_marketplaces.json" -Force
+    Write-Host "  [OK] known_marketplaces.json" -ForegroundColor Green
+    $backedUp += "known_marketplaces.json"
+}
+
 # Custom slash commands (non-destructive merge)
 if (Test-Path "$ClaudeDir\commands") {
     New-Item -ItemType Directory -Force -Path "$BackupDir\commands" | Out-Null
     Copy-Item "$ClaudeDir\commands\*" "$BackupDir\commands\" -Recurse -Force
     Write-Host "  [OK] commands/ (merged)" -ForegroundColor Green
     $backedUp += "commands/"
+}
+
+# Skills (non-destructive merge)
+if (Test-Path "$ClaudeDir\skills") {
+    New-Item -ItemType Directory -Force -Path "$BackupDir\skills" | Out-Null
+    Get-ChildItem "$ClaudeDir\skills" | ForEach-Object {
+        Copy-Item $_.FullName "$BackupDir\skills\$($_.Name)" -Recurse -Force
+    }
+    Write-Host "  [OK] skills/ (merged)" -ForegroundColor Green
+    $backedUp += "skills/"
+}
+
+# Todos (non-destructive merge)
+if (Test-Path "$ClaudeDir\todos") {
+    New-Item -ItemType Directory -Force -Path "$BackupDir\todos" | Out-Null
+    Get-ChildItem "$ClaudeDir\todos" | ForEach-Object {
+        Copy-Item $_.FullName "$BackupDir\todos\$($_.Name)" -Recurse -Force
+    }
+    Write-Host "  [OK] todos/ (merged)" -ForegroundColor Green
+    $backedUp += "todos/"
 }
 
 if ($backedUp.Count -eq 0) {

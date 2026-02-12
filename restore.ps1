@@ -52,6 +52,14 @@ if (Test-Path "$BackupDir\installed_plugins.json") {
     $restored += "installed_plugins.json"
 }
 
+# known_marketplaces.json
+if (Test-Path "$BackupDir\known_marketplaces.json") {
+    New-Item -ItemType Directory -Force -Path "$ClaudeDir\plugins" | Out-Null
+    Copy-Item "$BackupDir\known_marketplaces.json" "$ClaudeDir\plugins\known_marketplaces.json" -Force
+    Write-Host "  [OK] known_marketplaces.json" -ForegroundColor Green
+    $restored += "known_marketplaces.json"
+}
+
 # Projects
 if (Test-Path "$BackupDir\projects") {
     if (Test-Path "$ClaudeDir\projects") { Remove-Item "$ClaudeDir\projects" -Recurse -Force }
@@ -80,6 +88,26 @@ if (Test-Path "$BackupDir\commands") {
     Copy-Item "$BackupDir\commands" "$ClaudeDir\commands" -Recurse -Force
     Write-Host "  [OK] commands/" -ForegroundColor Green
     $restored += "commands/"
+}
+
+# Skills
+if (Test-Path "$BackupDir\skills") {
+    New-Item -ItemType Directory -Force -Path "$ClaudeDir\skills" | Out-Null
+    Get-ChildItem "$BackupDir\skills" | ForEach-Object {
+        Copy-Item $_.FullName "$ClaudeDir\skills\$($_.Name)" -Recurse -Force
+    }
+    Write-Host "  [OK] skills/" -ForegroundColor Green
+    $restored += "skills/"
+}
+
+# Todos
+if (Test-Path "$BackupDir\todos") {
+    New-Item -ItemType Directory -Force -Path "$ClaudeDir\todos" | Out-Null
+    Get-ChildItem "$BackupDir\todos" | ForEach-Object {
+        Copy-Item $_.FullName "$ClaudeDir\todos\$($_.Name)" -Recurse -Force
+    }
+    Write-Host "  [OK] todos/" -ForegroundColor Green
+    $restored += "todos/"
 }
 
 Write-Host ""
